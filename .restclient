@@ -1,0 +1,12 @@
+# Logon
+POST http://localhost:3000/
+Content-Type: application/json
+{ "tag": "LogonRequest",
+  "contents": {
+              "userName": "admin",
+              "password": "placeholder"
+              }
+}
+
+# Logon GET -- Not allowed
+GET http://localhost:3000/

@@ -23,10 +23,12 @@ import Node.Process (onSignal)
 import Type.Proxy (Proxy(..))
 
 router :: HandlerEnv -> Request -> ResponseM
-router env { body } =
-  case hush =<< (head $ oneOf $ ( handle body (Proxy :: _ Logon) ) :| []) of
-    Nothing -> HTTPure.badRequest body
-    Just reader -> runReaderT reader env
+router env { body, method }
+  | method == HTTPure.Post =
+    case hush =<< (head $ oneOf $ ( handle body (Proxy :: _ Logon) ) :| []) of
+      Nothing -> HTTPure.badRequest body
+      Just reader -> runReaderT reader env
+  | otherwise = HTTPure.methodNotAllowed
 
 port :: Int
 port = 3000
@@ -41,9 +43,10 @@ main = launchAff_ do
       liftEffect $ do
         shutdown <- HTTPure.serve port (router { accountsAVar })
                     $ log $ "Server up and running on port: " <> show port
-        let shutdownServer = do
+        let shutdownServer = launchAff_ do
               log "Shutting down server..."
-              shutdown $ log "Server shutdown."
+              AccountManger.shutdown accountsAVar
+              liftEffect $ shutdown $ log "Server shutdown."
         onSignal SIGINT shutdownServer
         onSignal SIGTERM shutdownServer
   pure unit

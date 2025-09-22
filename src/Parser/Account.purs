@@ -4,6 +4,7 @@ where
 
 import Prelude
 
+import Control.Alt ((<|>))
 import Data.Array (many, some, (:))
 import Data.CodePoint.Unicode (isAlpha, isAlphaNum, isLower, isUpper)
 import Data.Identity (Identity)
@@ -11,7 +12,7 @@ import Data.String.CodePoints (codePointFromChar)
 import Data.String.CodeUnits (fromCharArray)
 import Entity.Account (Account(..))
 import Text.Parsing.Parser (ParserT, fail)
-import Text.Parsing.Parser.String (anyChar, char, satisfy)
+import Text.Parsing.Parser.String (char, satisfy, string)
 
 type AccountParserT a = ParserT String Identity a
 
@@ -64,12 +65,9 @@ properName = do
 
 hex :: AccountParserT String
 hex = fromCharArray <$> (some $ satisfy isHex) where
-  isHex c = (c >= '0' && c <= '9') || (c >= 'a' || c <= 'f')
+  isHex c = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')
 
 boolean :: AccountParserT Boolean
-boolean = do
-  bool <- fromCharArray <$> some anyChar
-  case bool of
-    "true" -> pure true
-    "false" -> pure false
-    _ -> fail "Invalid boolean"
+boolean = (string "true" *> pure true)
+          <|> (string "false" *> pure false)
+          <|> fail "Invalid boolean"
