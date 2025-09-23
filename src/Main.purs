@@ -20,7 +20,8 @@ import HTTPure.Response (ResponseM)
 import Handler.Account as AccountHandler
 import Handler.Api.Logon (Logon)
 import Handler.Class.ApiHandler (HandlerEnv, handle)
-import Manager.Account as AccountManger
+import Manager.Account as AccountManager
+import Manager.Session as SessionManager
 import Node.Process (onSignal)
 import Record (delete)
 import Type.Proxy (Proxy(..))
@@ -28,7 +29,7 @@ import Type.Proxy (Proxy(..))
 router :: HandlerEnv -> Request -> ResponseM
 router env { body, method }
   | method == HTTPure.Post =
-    case hush =<< (head $ oneOf $ ( handle body (Proxy :: _ Logon) ) :| []) of
+    case hush =<< (head $ oneOf $ ( handle (Proxy :: _ Logon) body ) :| []) of
       Nothing -> HTTPure.badRequest body
       Just reader -> runReaderT reader env
   | otherwise = HTTPure.methodNotAllowed
@@ -58,13 +59,15 @@ main = launchAff_ do
   case loadResults of
     Left err -> log $ "Cannot load accounts: " <> show err
     Right accounts -> do
-      accountsAVar <- AccountManger.startUp accounts
+      accountsAVar <- AccountManager.startUp accounts
+      sessionsAVar <- SessionManager.startUp
       liftEffect $ do
-        shutdown <- HTTPure.serve port (loggingRouter { accountsAVar })
+        shutdown <- HTTPure.serve port (loggingRouter { accountsAVar, sessionsAVar })
                     $ log $ "Server up and running on port: " <> show port
         let shutdownServer = launchAff_ do
               log "Shutting down server..."
-              AccountManger.shutdown accountsAVar
+              SessionManager.shutdown sessionsAVar
+              AccountManager.shutdown accountsAVar
               liftEffect $ shutdown $ log "Server shutdown."
         onSignal SIGINT shutdownServer
         onSignal SIGTERM shutdownServer

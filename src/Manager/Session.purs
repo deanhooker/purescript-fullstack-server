@@ -17,7 +17,7 @@ import Entity.Session (Session(..))
 type Sessions = Map UUID Session
 
 startUp :: Aff (AVar Sessions)
-startUp = AVar.empty
+startUp = AVar.new Map.empty
 
 shutdown :: AVar Sessions -> Aff Unit
 shutdown = void <<< AVar.take
