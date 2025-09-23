@@ -2,7 +2,8 @@ module Manager.Account where
 
 import Prelude
 
-import Data.Map (Map, fromFoldable, lookup)
+import Data.Map (Map)
+import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
@@ -10,12 +11,17 @@ import Effect.Aff.AVar (AVar)
 import Effect.Aff.AVar as AVar
 import Entity.Account (Account(..))
 import Handler.Account (passwordHashHex)
+import Utils (withAVar)
 
 type Accounts = Map String Account
 
+data CreateAccountResult
+  = CreateAccountSuccess
+  | CreateAccountAlreadyExists
+
 startUp :: Array Account -> Aff (AVar Accounts)
 startUp accounts = do
-  AVar.new $ fromFoldable $ toTuple <$> accounts where
+  AVar.new $ Map.fromFoldable $ toTuple <$> accounts where
         toTuple = \a@(Account { userName }) -> Tuple userName a
 
 shutdown :: AVar Accounts -> Aff Unit
@@ -25,7 +31,7 @@ verifyLogon :: AVar Accounts -> String -> String -> Aff (Maybe Account)
 verifyLogon accountsAVar userName password = do
   accounts <- AVar.read accountsAVar
   passwordHash' <- passwordHashHex userName password
-  let account = lookup userName accounts
+  let account = Map.lookup userName accounts
   pure $ case account of
     Nothing -> Nothing
     (Just
@@ -33,3 +39,11 @@ verifyLogon accountsAVar userName password = do
       if passwordHash == passwordHash'
       then account
       else Nothing
+
+createAccount :: AVar Accounts -> Account -> Aff CreateAccountResult
+createAccount accountsAVar newAccount@(Account { userName }) = do
+  withAVar accountsAVar
+    \accounts -> pure $
+      if Map.member userName accounts
+      then Tuple accounts CreateAccountAlreadyExists
+      else Tuple (Map.insert userName newAccount accounts) CreateAccountSuccess
