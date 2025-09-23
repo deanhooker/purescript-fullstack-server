@@ -10,3 +10,12 @@ Content-Type: application/json
 
 # Logon GET -- Not allowed
 GET http://localhost:3000/
+
+# Logoff POST
+POST http://localhost:3000/
+Content-Type: application/json
+{ "tag": "LogoffRequest",
+  "contents": {
+              "authToken": "aa453a8a-5c3c-4b6f-af79-5026bd3957d7"
+              }
+}

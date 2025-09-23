@@ -2,12 +2,13 @@ module Main where
 
 import Prelude
 
+import Control.Alt ((<|>))
 import Control.Monad.Reader (runReaderT)
-import Data.Array (head)
 import Data.Either (Either(..), hush)
+import Data.Foldable (class Foldable, foldl)
 import Data.JSDate (getTime, now, toUTCString)
 import Data.Maybe (Maybe(..))
-import Data.NonEmpty (oneOf, (:|))
+import Data.NonEmpty (NonEmpty, (:|))
 import Data.Posix.Signal (Signal(..))
 import Data.UUID (genUUID)
 import Effect (Effect)
@@ -18,6 +19,7 @@ import HTTPure as HTTPure
 import HTTPure.Request (Request)
 import HTTPure.Response (ResponseM)
 import Handler.Account as AccountHandler
+import Handler.Api.Logoff (Logoff)
 import Handler.Api.Logon (Logon)
 import Handler.Class.ApiHandler (HandlerEnv, handle)
 import Manager.Account as AccountManager
@@ -26,10 +28,17 @@ import Node.Process (onSignal)
 import Record (delete)
 import Type.Proxy (Proxy(..))
 
+oneOf :: forall a e f. Foldable f => NonEmpty f (Either e a) -> Either e a
+oneOf (x :| xs) = foldl (<|>) x xs
+
 router :: HandlerEnv -> Request -> ResponseM
 router env { body, method }
   | method == HTTPure.Post =
-    case hush =<< (head $ oneOf $ ( handle (Proxy :: _ Logon) body ) :| []) of
+    let handlers =
+          handle (Proxy :: _ Logon) :| [
+          handle (Proxy :: _ Logoff)
+          ] <#> (_ $ body) in
+    case hush $ oneOf handlers of
       Nothing -> HTTPure.badRequest body
       Just reader -> runReaderT reader env
   | otherwise = HTTPure.methodNotAllowed

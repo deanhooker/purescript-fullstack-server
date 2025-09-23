@@ -13,5 +13,8 @@
   "devDependencies": {
     "purescript": "^0.14.1",
     "spago": "^0.20.0"
+  },
+  "dependencies": {
+    "uuid": "^8.3.2"
   }
 }

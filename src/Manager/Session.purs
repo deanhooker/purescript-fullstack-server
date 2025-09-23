@@ -52,7 +52,13 @@ expireSessions sessionsAVar = do
   now <- getTime <$> liftEffect now
   sessions <- AVar.take sessionsAVar
   let sessions' = Map.filter
-                  (\(Session { lastTime }) ->  now - lastTime > sessionTimeout ) sessions
+                  (\(Session { lastTime }) ->  now - lastTime < sessionTimeout ) sessions
+  AVar.put sessions' sessionsAVar
+
+removeSession :: AVar Sessions -> UUID -> Aff Unit
+removeSession sessionsAVar authToken = do
+  sessions <- AVar.take sessionsAVar
+  let sessions' = Map.delete authToken sessions
   AVar.put sessions' sessionsAVar
 
 sessionTimeout :: Number
