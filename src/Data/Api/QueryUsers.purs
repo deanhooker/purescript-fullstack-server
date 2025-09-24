@@ -1,4 +1,4 @@
-module Api.QueryUsers where
+module Data.Api.QueryUsers where
 
 import Data.Generic.Rep (class Generic)
 import Data.UUID (UUID)
@@ -8,21 +8,29 @@ import Foreign.Generic.Class (class Decode, class Encode, defaultOptions)
 
 newtype QueryUsersRequest = QueryUsersRequest { authToken :: UUID }
 
-data FailureReason
+derive instance genericQueryusersRequest :: Generic QueryUsersRequest _
+
+instance encodeQueryusersRequest :: Encode QueryUsersRequest where
+  encode = genericEncode defaultOptions
+
+instance decodeQueryusersRequest :: Decode QueryUsersRequest where
+  decode = genericDecode defaultOptions
+
+data QueryUsersFailureReason
   = NotAuthorized
   | NotAuthenticated
 
-derive instance genericFailureReason :: Generic FailureReason _
+derive instance genericQueryUsersFailureReason :: Generic QueryUsersFailureReason _
 
-instance encodeFailureReason :: Encode FailureReason where
+instance encodeQueryUsersFailureReason :: Encode QueryUsersFailureReason where
   encode = genericEncode defaultOptions
 
-instance decodeFailureReason :: Decode FailureReason where
+instance decodeQueryUsersFailureReason :: Decode QueryUsersFailureReason where
   decode = genericDecode defaultOptions
 
 data QueryUsersResults
   = QueryUsersResultsSuccess { users  :: Array User }
-  | QueryUsersResultsFailure { reason :: FailureReason }
+  | QueryUsersResultsFailure { reason :: QueryUsersFailureReason }
 
 derive instance genericQueryUsersResults :: Generic QueryUsersResults _
 

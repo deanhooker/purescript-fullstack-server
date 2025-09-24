@@ -25,7 +25,7 @@ POST http://localhost:3000/
 Content-Type: application/json
 { "tag": "CreateUserRequest",
   "contents": {
-              "authToken": "d691fb7b-72c7-4de6-8236-a7694479a481",
+              "authToken": "2050537b-1b5b-4f27-b672-1ea43320afde",
               "user": {
                       "userName": "joemama",
                       "password": "joejoejoe",
@@ -35,4 +35,13 @@ Content-Type: application/json
                       "lastName": "Mama"
                       }
                }
+}
+
+# QueryUsers POST
+POST http://localhost:3000/
+Content-Type: application/json
+{ "tag": "QueryUsersRequest",
+  "contents": {
+              "authToken": "e925f6b6-7cc6-4323-94ec-0c81caca2d05"
+              }
 }
