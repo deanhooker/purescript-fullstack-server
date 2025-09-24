@@ -19,3 +19,20 @@ Content-Type: application/json
               "authToken": "aa453a8a-5c3c-4b6f-af79-5026bd3957d7"
               }
 }
+
+# CreateUser POST
+POST http://localhost:3000/
+Content-Type: application/json
+{ "tag": "CreateUserRequest",
+  "contents": {
+              "authToken": "d691fb7b-72c7-4de6-8236-a7694479a481",
+              "user": {
+                      "userName": "joemama",
+                      "password": "joejoejoe",
+                      "temporaryPassword": true,
+                      "admin": true,
+                      "firstName": "Joe",
+                      "lastName": "Mama"
+                      }
+               }
+}

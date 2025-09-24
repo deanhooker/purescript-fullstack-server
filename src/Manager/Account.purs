@@ -2,6 +2,8 @@ module Manager.Account where
 
 import Prelude
 
+import Crypto (passwordHashHex)
+import Data.Either (Either(..))
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
@@ -10,14 +12,11 @@ import Effect.Aff (Aff)
 import Effect.Aff.AVar (AVar)
 import Effect.Aff.AVar as AVar
 import Entity.Account (Account(..))
-import Handler.Account (passwordHashHex)
 import Utils (withAVar)
 
 type Accounts = Map String Account
 
-data CreateAccountResult
-  = CreateAccountSuccess
-  | CreateAccountAlreadyExists
+data CreateAccountError = CreateAccountAlreadyExists
 
 startUp :: Array Account -> Aff (AVar Accounts)
 startUp accounts = do
@@ -40,10 +39,15 @@ verifyLogon accountsAVar userName password = do
       then account
       else Nothing
 
-createAccount :: AVar Accounts -> Account -> Aff CreateAccountResult
+createAccount :: AVar Accounts -> Account -> Aff (Either CreateAccountError Unit)
 createAccount accountsAVar newAccount@(Account { userName }) = do
   withAVar accountsAVar
     \accounts -> pure $
       if Map.member userName accounts
-      then Tuple accounts CreateAccountAlreadyExists
-      else Tuple (Map.insert userName newAccount accounts) CreateAccountSuccess
+      then Tuple accounts (Left CreateAccountAlreadyExists)
+      else Tuple (Map.insert userName newAccount accounts) (Right unit)
+
+findAccount :: AVar Accounts -> String -> Aff (Maybe Account)
+findAccount accountsAVar userName = do
+  accounts <- AVar.read accountsAVar
+  pure $ Map.lookup userName accounts

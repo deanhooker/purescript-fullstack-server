@@ -37,6 +37,7 @@ You can edit this file as you like.
   , "stringutils"
   , "transformers"
   , "tuples"
+  , "typelevel-prelude"
   , "unicode"
   , "uuid"
   ]

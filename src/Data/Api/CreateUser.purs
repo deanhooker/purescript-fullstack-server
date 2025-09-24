@@ -1,4 +1,4 @@
-module CreateUser where
+module Data.Api.CreateUser where
 
 import Data.Generic.Rep (class Generic)
 import Data.UUID (UUID)
@@ -20,22 +20,23 @@ instance encodeCreateUserRequest :: Encode CreateUserRequest where
 instance decodeCreateUserRequest :: Decode CreateUserRequest where
   decode = genericDecode defaultOptions
 
-data FailureReason
+data CreateUserFailureReason
   = AlreadyExists
   | NotAuthorized
   | NotAuthenticated
+  | FileIOError String
 
-derive instance genericFailureReason :: Generic FailureReason _
+derive instance genericFailureReason :: Generic CreateUserFailureReason _
 
-instance encodeFailureReason :: Encode FailureReason where
+instance encodeCreateUserFailureReason :: Encode CreateUserFailureReason where
   encode = genericEncode defaultOptions
 
-instance decodeFailureReason :: Decode FailureReason where
+instance decodeCreateUserFailureReason :: Decode CreateUserFailureReason where
   decode = genericDecode defaultOptions
 
 data CreateUserResults
   = CreateUserResultsSuccess
-  | CreateUserResultsFailure { reason :: FailureReason }
+  | CreateUserResultsFailure { reason :: CreateUserFailureReason }
 
 derive instance genericCreateUserResults :: Generic CreateUserResults _
 
