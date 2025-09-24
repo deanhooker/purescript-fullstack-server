@@ -8,13 +8,11 @@ import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.Newtype (unwrap)
 import Data.String (joinWith)
-import Data.String.Utils (lines)
-import Data.Traversable (sequence)
 import Effect.Aff (Aff)
 import Entity.Account (Account(..))
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff (appendTextFile, exists, readTextFile, writeTextFile)
-import Parser.Account (accountParser)
+import Parser.Account (accountsParser)
 import Text.Parsing.Parser (ParseError, runParserT)
 
 data CreateUserFailureReason
@@ -34,8 +32,8 @@ loadAccounts = do
   unless exists do
     bsa <- bootstrapAccount
     writeTextFile ASCII accountsFile bsa
-  accountsLines <- lines <$> readTextFile ASCII accountsFile
-  pure $ sequence $ unwrap <<< flip runParserT accountParser <$> accountsLines
+  fileData <- readTextFile ASCII accountsFile
+  pure $ unwrap $ runParserT fileData accountsParser
 
 createAccount :: Account -> Aff (Either CreateAccountError Unit)
 createAccount account =

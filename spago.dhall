@@ -34,7 +34,6 @@ You can edit this file as you like.
   , "quickcheck"
   , "record"
   , "strings"
-  , "stringutils"
   , "transformers"
   , "tuples"
   , "typelevel-prelude"
