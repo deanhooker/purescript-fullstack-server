@@ -21,6 +21,7 @@ You can edit this file as you like.
   , "js-date"
   , "lcg"
   , "maybe"
+  , "media-types"
   , "newtype"
   , "node-buffer"
   , "node-fs-aff"

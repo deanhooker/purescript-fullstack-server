@@ -45,3 +45,6 @@ Content-Type: application/json
               "authToken": "e925f6b6-7cc6-4323-94ec-0c81caca2d05"
               }
 }
+
+# Get JS
+GET http://localhost:3000/index.js
