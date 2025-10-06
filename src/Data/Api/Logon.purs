@@ -22,6 +22,7 @@ instance decodeLogonRequest :: Decode LogonRequest where
 data LogonResults
   = LogonResultsSuccess
     { authToken :: UUID
+    , admin :: Boolean
     , mustChangePassword :: Boolean
     }
   | LogonResultsFailure
