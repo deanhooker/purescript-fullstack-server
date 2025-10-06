@@ -1,5 +1,7 @@
 module Entity.User where
 
+import Prelude
+
 import Data.Generic.Rep (class Generic)
 import Foreign.Generic (genericDecode, genericEncode)
 import Foreign.Generic.Class (class Decode, class Encode, defaultOptions)
@@ -17,7 +19,7 @@ newtype User = User
   { | UserRow () }
 
 derive instance genericUser :: Generic User _
-
+derive instance eqUser :: Eq User
 instance encodeUser :: Encode User where
   encode = genericEncode defaultOptions
 
